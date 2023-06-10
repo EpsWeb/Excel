@@ -258,3 +258,11 @@
     После этого правая кнопка мыши => Format document with => Configure default formatter => Eslint. 
     * Теперь при нажатии  Shift+Alt+F форматировании будет согласно eslint
     На этом настройка webpack завершена. Радуемся этому!
+
+
+
+
+8. Git.
+    git add .
+    git commit -m 'Finish project config'
+    git push -u origin webpack
