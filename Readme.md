@@ -262,7 +262,18 @@
 
 
 
-8. Git.
-    git add .
-    git commit -m 'Finish project config'
-    git push -u origin webpack
+8. Git flow.
+    `git add .`
+    `git commit -m 'Finish project config'`
+    `git push -u origin webpack` (Или просто `git push`. Проверить, проканает ли, если нет, то полную комманду с `-u origin`)
+
+    Идём на сайт гитхаба:
+        Мы там в ветке `master`, код старый. Переключаемся на ветку `webpack`, видим изменённый код.
+        * Хотим смёржить ветки, кликаем на "Compare & pull request". Там стрелочкой показано, что мы заливаем ветку `webpack` в `master`.
+        Оставляем комментарий 'Added webpack and 2 modes for development and production'
+        * Там справа "Reviewers", показать, что есть такие, их можно добавлять но в этом проекте никого.
+        Переходим на сам проект, там во вкладке `Pull-requests` теперь `1`. Заходим туда. Там видны коммиты, что было изменено. Заходим на большой коммит `Finish...` Делаем поиск по `semi` Осталяем комментарий у `"semi": "off"`: "Почему нет точек с запятой?".
+        Возвращаемся на наш pull-requst. Обращаем внимание на кнопку `Merge pull request`:
+        * `Squash and merge` означает скомбинировать все коммиты в один. Rebase - rebase :)
+        Нажимаем `Merge pull request`, `Confirm merge`
+        Всё, тепеь ветки смёрджины. Переходим на ветку `main`, радуемся обновлённому коду.
