@@ -804,7 +804,7 @@ s3. 1. Установка плагинов
             `
     Теперь разберёмся с гитом. Остановим build-процесс в консоли и зальём изменения в удалённый репозиторий и смёрджимся с основной веткой.
         `git add .`
-        `git commit -m 'Finish css layout'`
+        `git commit -m 'Finish css layout'`    // Эти вещи можно сделать через VS Code
         `git push -u origin css-layout`
     Идём на сайт гитхаб. В наш репозиторий. Видим, что появилась ветка `css-layout`.
     `Compare and pull request`
