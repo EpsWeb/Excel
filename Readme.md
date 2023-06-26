@@ -1601,6 +1601,19 @@
         * Сейчас мы закончили приготовление фреймворка и теперь добавим все изменнеия в гит.
             `git add .`
             `git commit -m 'Finish base framework functional'`
+            `git push -u origin framework-start`
+        Всё, запушили. Заходим на сайт `github`. Видим в ветке `main` старый код. 
+        Заходим в ветку `framework-start`. Видим новый код. Надо сделать `pull-request` и замёржить ветки.
+        Видим, что ветка `framework-start` отличается от ветки `main` на 1 коммит. Это тот самый коммит, который мы сделали в ветке `framework-start`.
+        Кликаем по кнопке `Compare and pull request`
+            `Create pull request`
+            `Merge pull request`
+            `Confirm merge`
+        Всё, замёржили ветки. Теперь в ветке `main` тоже есть новый код.
+        Теперь надо сделать `git pull` в ветке `main`:
+            `git checkout main`
+            `git pull`
+
 
 
 
