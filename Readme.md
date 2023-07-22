@@ -64,7 +64,7 @@
     После этой комманды файл `bundle.js` должен быть минимизированный, показать это, выполнив:
     `node dist/bundle.js`
 
-    Видим в консоли консоль логи, это значит, что production-сборка работает
+    Видим в консоли консоль логи, это значит, что `production`-сборка работает
 
     В `.gitignore` добавить `dist`
 
@@ -101,7 +101,7 @@
                 </html>
             `
         `npm run start`
-        Видим `bundle.js` - шлавный скрипт. С хэшем. Внутри html с подключённым скриптом
+        Видим `bundle.js` - главный скрипт. С хэшем. Внутри html с подключённым скриптом
     2 плагин - `CopyWebpackPlugin` (чтобы переносить `favicon`, тоже на сайте)
         Воруем `favicon` с сайта `https://www.google.com/sheets/about/` (в консоли взял ссылку на favicon)
         `webpack.config.js`:
@@ -212,8 +212,8 @@
         `
     `npm run start, npm run build`. Смотрим в консоли на значение этих переменных. Всё ок, удаляем консоли логи.
     * Переменная `isProd` нужна для того, чтобы задать разные значения `webpack.config`у в зависимости от режима сборки.
-    Например, hash мы хотим добавлять только в режиме `production`
-    Для этого пишем функцию filename:
+    Например, `hash` мы хотим добавлять только в режиме `production`
+    Для этого пишем функцию `filename`:
         `const filename = ext => isDev ? `bundle.${ext}` : `bundle.[hash].${ext}`;`
     Меняем в `wepback.config.js` "bundle.[hash].css" => filename("css") и "bundle.[hash].js" => filename("js")
     `npm run start, npm run build`: Смотрим, что в prod сборке названия с хэшем, в dev - нет.
@@ -278,7 +278,7 @@
     `   
 
     Также создаём файл `.eslintignore`. Пока пустой
-    * Можно всё настраивать самому, но лучше воспользоваться готовым пресетом. например, `google-eslint`. Это пакет, содержащий в себе базокую конфигурацию, который google считает нужным для JS `style-guide`
+    * Можно всё настраивать самому, но лучше воспользоваться готовым пресетом. например, `google-eslint`. Это пакет, содержащий в себе базовую конфигурацию, который google считает нужным для JS `style-guide`
     Гуглим `eslint-google`, открываем сайт npm:
         `npm i eslint-config-google -D`
         С этого сайта берём как использовать (в файл `.eslintrc`):
@@ -323,8 +323,8 @@
 
 4. Вёрстка (https://docs.google.com/spreadsheets/u/0/)
     
-4. 1. Планирование:
-    Сайт будет сожержать 2 страницы
+4. 1. Планирование (диаграмма `Layout`) (в гугле `drawio`, чтоб попасть на сайт):
+    Сайт будет содержать 2 страницы
     Первая (страница таблицы): 
         Нажимаем на `+` (создание таблицы), страница самой таблицы (имя на диаграмме - `Excel`). Сверху - header с инпутом названия таблицы и двумя кнопками справа - закрытие таблицы и удаление таблицы.
         Ниже - туллбар с кнопочками. Мы сделаем не все, но основные.
@@ -367,7 +367,7 @@
         .excel {
             position: relative;
         }
-    Начнём `со` страницы Excel (1):
+    Начнём со страницы `Excel` (1):
         Там 4 элемента (header, toolbar, formula, table - далее `компоненты`). Для каждого из них создадим scss-файл (а также `_variables.scss` и `_mixins.scss`).
         В файлы компонентов делаю импорт переменных и миксинов:
             `
@@ -385,16 +385,12 @@
     `index.html`:
         `
             <div id="app" class="container">
-
                 <div class="excel">
-
                     <div class="excel__header"></div>
                     <div class="excel__toolbar"></div>
                     <div class="excel__formula"></div>
                     <div class="excel__table"></div>
-
                 </div>
-
             </div>
         `
     В scss-файл каждого компонента вставляем имя класса. Например:
@@ -1613,8 +1609,758 @@
         Теперь надо сделать `git pull` в ветке `main`:
             `git checkout main`
             `git pull`
+        Теперь в ветке `main` локальной тоже есть новый код. Радуемся этому.
+6. Ресайз таблицы.
+    6. 1. Алгоритм действий.
+        Сразу перейдём на новую ветку `resize`
+            `git checkout -b resize`
+        И запустим проект
+            `npm run start`
+        * Показать, как происходит ресайз ячеек в реальном Excel. Навоэу на грань колонки, появляется какой-то значок, двигаю мышкой - меняется ширина колонки. Также и с рядами.
+        * Подумаем, как это реализовать. Для этого сделаем диаграмму `Ресайз`.
+        * Для начала сделаем ресайз колонок. Для этого надо сделать следующее:
+            1. При наведении на границу колонки должен появляться значок ресайза
+            2. При клике на границу колонки должна появляться горизонтальная полоса ресайза
+            4. При движении мышки вправо-влево должна меняться ширина колонки
+            5. При отпускании мышки должен применяться ресайз
+
+        Теперь откроем файл `Table.js`. Создадим конструктор и добавим пару листенеров: `click` и `mousedown`
+            `Table.js`
+                `
+                    constructor($root) {
+                        super($root, {
+                            listeners: ["click", "mousedown"],
+                        });
+                    }
+                    onClick() {
+                        console.log("click");
+                    }
+                    onMousedown(event) {
+                        console.log("mousedown", event.target);
+                    }
+                `
+            * Сейчас мы видим в консоли, что при нажатии на таблицу, срабатывает листенер `mousedown`. А когда отрываем курсор, срабатывает `click`. Т.е. когда мы зажали мышку и двигаем её, срабатывает `mousedown`. А когда отпускаем, срабатывает `click`. 
+            * А при движении мышки срабатывает листенер `mousemove`. Поэтому добавим его тоже:
+                `Table.js`
+                    `
+                        constructor($root) {
+                            super($root, {
+                                listeners: ["click", "mousedown", "mousemove"],
+                            });
+                        }
+                        onClick() {
+                            console.log("click");
+                        }
+                        onMousedown(event) {
+                            console.log("mousedown", event.target);
+                        }
+                        onMousemove() {
+                            console.log("mousemove");
+                        }
+                    `
+            * Т.е. порядок действий такой - мы зажимаем мышку, срабатывает `mousedown`. Двигаем мышку, срабатывает `mousemove`. Отпускаем мышку, срабатывает `mouseup`.
+    6. 2. Создаём элемент для ресайза.
+        Сотрём все листенеры, они нам пока не нужны.
+            `Table.js` (full)
+                `
+                    export class Table extends ExcelComponent {
+                        static className = "excel__table";
+                        constructor($root) {
+                            super($root, {
+                            // listeners: ["click", "mousedown", "mousemove"],
+                            });
+                        }
+                        toHTML() {
+                            return createTable(20);
+                        }
+                    }
+                `
+        * В каждой колонке хэдера создадим див с классом `col-resize`. Это и будет наш элемент ресайза:
+            `table.template.js`:
+                `
+                    function toColumn(el) {
+                        return `
+                            <div class="column">
+                                ${el}
+                                <div class="col-resize"></div>
+                            </div>
+                        `;
+                    }
+                `
+            
+            * Теперь в каждой ячейке хэдера есть див с классом `col-resize`. Это и есть элемент для ресайза. Поэтому надо сделать так, чтобы при наведении на ячейку, был виден этот элемент.
+                `table.scss`:
+                    `
+                        .col-resize {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            bottom: 0;
+                            width: 4px;
+                            background-color: #3c74ff;
+                            cursor: col-resize;
+                        }
+                    `
+                Цвет этот мы будем ещё использовать, поэтому вынесем его в переменную:
+                    `table.scss`:
+                        `
+                            .column {
+                                position: relative;
+                                display: flex;
+                                ...
+                            .col-resize {
+                                position: absolute;
+                                top: 0;
+                                right: 0;
+                                bottom: 0;
+                                width: 4px;
+                                background-color: $primary-color;
+                                cursor: col-resize;
+                            }
+                        `
+                    `_variables.scss`:
+                        `
+                            $primary-color: #3c74ff;
+                        `
+            * Эти элементы синенькие должны быть видны только тогда, когда мы наводим на них курсор. Поэтому по умолчанию будет `opacity: 0`, а при наведении мыши - `opacity: 1`
+                `table.scss`:
+                    `
+                        .col-resize {
+                            position: absolute;
+                            top: 0;
+                            right: 0;
+                            bottom: 0;
+                            width: 4px;
+                            background-color: $primary-color;
+                            cursor: col-resize;
+                            opacity: 0;
+                            transition: opacity 0.1s ease-in-out;
+                                &:hover {
+                                    opacity: 1;
+                                }
+                        }
+                    `
+                * Теперь со строчками.
+                    Внутри дива с классом `row-info` нужно поместить такой же див.
+                        `table.template.js`:
+                            `
+                                function createRow(index, content) {
+                                    return `
+                                        <div class="row">
+                                        <div class="row-info">
+                                            ${index}
+                                            <div class="row-resize"></div>
+                                        </div>
+                                        <div class="row-data">${content}</div>
+                                        </div>  
+                                    `;
+                                }
+                            `
+
+                            `table.scss`:
+                                `
+                                .row-info {
+                                    position: relative;
+                                    display: flex;
+                                    ...
+                                    .row-resize {
+                                        position: absolute;
+                                        left: 0;
+                                        right: 0;
+                                        bottom: 0;
+                                        height: 4px;
+                                        background-color: $primary-color;
+                                        cursor: row-resize;
+                                        opacity: 0;
+                                        transition: opacity 0.1s ease-in-out;
+                                        &:hover {
+                                            opacity: 1;
+                                        }
+                                    }
+                                `
+                Теперь у нас есть дублирование кода, это надо исправить
+                    `table.scss`:
+                        `
+                            .col-resize,
+                            .row-resize {
+                                position: absolute;
+                                right: 0;
+                                bottom: 0;
+                                background-color: $primary-color;
+                                opacity: 0;
+                                transition: opacity 0.1s ease-in-out;
+
+                                &:hover {
+                                    opacity: 1;
+                                }
+                            }
+
+                            .col-resize {
+                                top: 0;
+                                width: 4px;
+                                cursor: col-resize;
+                            }
+
+                            .row-resize {
+                                left: 0;
+                                height: 4px;
+                                cursor: row-resize;
+                            }
+                        `
+                Проверяем в браузере. Всё ок.
+                Теперь уберём `opacity: 0`. Убрали. Видим, что у ячеек рядов сверху один лишний ресайзер.
+                Поэтому в функции `createRow` добавим условие, что если `index` пустой, то не выводить ресайзер:
+                    `table.template.ts`:
+                        `
+                            function createRow(index, content) {
+                                const resize = index ? '<div class="row-resize"></div>' : ""
+                                return `
+                                    <div class="row">
+                                    <div class="row-info">
+                                        ${index}
+                                        ${resize}
+                                    </div>
+                                    <div class="row-data">${content}</div>
+                                    </div>  
+                                `;
+                            }
+                        `
+                * Вернём `opacity`
+
+        * Теперь поработем над логикой элемента ресайза. Событие, на которое мы будем реагировать в первую очередь - `mousedown`. Поэтому в компоненте таблицы (`Table`) надо создать листенер `mousedown` и, соответственно, коллбэк `onMousedown(event)`:
+            `Table.js` (full):
+                `
+                    export class Table extends ExcelComponent {
+                        static className = "excel__table";
+                        constructor($root) {
+                            super($root, {
+                                listeners: ["mousedown"],
+                            });
+                        }
+                        toHTML() {
+                            return createTable(20);
+                        }
+                        onMousedown(event) {
+                            console.log(event.target);
+                        }
+                    }
+                `
+                * Смотрим в консоли, видим элементы, по которым мы кликаем.
+                * Коллбэк срабатывает по клику на любой элемент. А нужн онам, чтобы он срабатывал только по клику на ресайзер. Подумаем, как это сделать (выделить элементы ресайза и реагировать только на клики по ним).
+
+        *** Тут надо объяснить почему мы будем работать с дата-атрибутами, а не с классами, id или ещё что-то такое, связанное с View. Нам надо определять по какому элементу мы кликаем. Можно, конечно, это определять по классу, но тогда может произойти следующее. Моэет прийти тимлид и сказать, что названия классов не соответствуют нашему стайл-гайду, и надо бы их переименовать. Мол, БЭМ неправильный, например. Или вообще прийдёт следующий программист, которому не понравятся эти названия классов, и он их изменит. Тогда логика полетит к чертям. Это допускать никак нельзя. Классы, id - только для вью. Для всех логических вещей мы будем использовать data-атрибуты. Они будут служить нам метадатой. Прослойкой, какбэ, между вью и логикой. *** `(Ресайз, диаграмма 2)`
+
+        * Поэтому добавим элементам ресайза атрибут `data-resize` в значении `row` и `col`:
+            `table.template.js`:
+                `
+                    function toColumn(el) {
+                        return `
+                            <div class="column">
+                            ${el}
+                            <div class="col-resize" data-resize="col"></div> 
+                            </div>
+                        `;
+                        }
+
+                        function createRow(index, content) {
+                        const resize = index ? '<div class="row-resize" data-resize="row"></div>' : ""
+                        return `
+                            <div class="row">
+                            <div class="row-info">
+                                ${index}
+                                ${resize}
+                            </div>
+                            <div class="row-data">${content}</div>
+                            </div>  
+                        `;
+                        }
+                `
+        * Теперь надо отловить клик по именно элементу ресайза (взять значение их дата-атрибута).
+        Значение любого атрибута можно взять серез `.getAttribute(attrName)`
+            `Table.js`:
+                `
+                    onMousedown(event) {
+                        console.log(event.target.getAttribute("data-resize"));
+                    }
+                `
+        Но можно и проще. В `event.target` есть свойство `dataset`, в котором лежат все дата-атрибуты. Поэтому можно сразу обратиться к нему:
+            `Table.js`:
+                `
+                    onMousedown(event) {
+                        console.log(event.target.dataset.resize);
+                    }
+                `
+                * Смотрим в консоли. Видим, что при клике на ресайзеры, выводится `col` и `row`. Это и есть наши дата-атрибуты.
+                * Сделаем проверку на элемент ресайза:
+                    `Table.js`:
+                        `
+                            onMousedown(event) {
+                                if (event.target.dataset.resize) {
+                                    console.log('Start resizing: ', event.target.dataset.resize);
+                                }
+                            }
+                        `
+
+    6. 3. Изменяем размер колонок.
+        *** Теперь сделаем, наконец, сам ресайз колонок ***
+            Когда мы нажали на ресайзер, надо сделать следующее:
+                1. Найти элемент, который мы будем ресайзить
+                2. Посчитать его новую ширину
+                3. Изменить ширину элемента
+            * Теперь надо найти элемент, который мы будем ресайзить. Это будет ячейка, в которой находится ресайзер. Мы можем найти его как `parentNode` элемента ресайза.
+                `Table.js`:
+                    `
+                        onMousedown(event) {
+                            if (event.target.dataset.resize) {
+                                const $resizer = $(event.target);
+                                const $parent = $resizer.$nativeElement.parentNode;
+                                console.log($parent);
+                            }
+                        }
+                    `
+                    * Смотрим в консоли, работает, но это не очень, потому что `parentNode` лучше не использовать, так как, если мы изменим вёрстку, и элемент уже не будет родительским к ресайзу, логика полетит. Поэтому мы опять будем использовать дата-атрибуты, и нужному диву дадим `data-type='resizable'`
+                        * P.S. так же можно было бы использовать 
+                        `const $parent = $resizer.$nativeElement.closest(".column")`, но это опять привязка к вью, поэтому мы не будем его использовать.
+                    `table.template.js`:
+                        `
+                            function toColumn(el) {
+                                return `
+                                    <div class="column" data-type="resizable">
+                                    ${el}
+                                    <div class="col-resize" data-resize="col"></div> 
+                                    </div>
+                                `;
+                            }
+                        `
+                        Проверяем в консоли, всё ок.
+                        * Перенесём только в класс `Dom` метод, получающий ближайшго родителя
+                            `Dom.js`:
+                                `
+                                    export class Dom {
+                                        ...
+                                        closest(selector) {
+                                            return $(this.$nativeElement.closest(selector));
+                                        }
+                                    }
+                                `
+                        * Теперь в `Table.js` мы можем написать так:
+                            `Table.js`:
+                                `
+                                    onMousedown(event) {
+                                        if (event.target.dataset.resize) {
+                                            const $resizer = $(event.target);
+                                            const $parent = $resizer.closest("[data-type='resizable']");
+                                            console.log($parent);
+                                        }
+                                    }
+                                `
+                                Проверяем в консоли (кликаем на `resizer` колонки), всё ок (там `Dom`-объект с нужным `nativeElement`).
+                        * Теперь надо написать метод, возвращающий размеры элемента. Для этого в html есть функция `getBoundingClientRect()`
+                            `Dom.js`:
+                                `
+                                    export class Dom {
+                                        ...
+                                        getCoords() {
+                                            return this.$nativeElement.getBoundingClientRect();
+                                        }
+                                    }
+                                `
+                        * У `getBoundingClientRect()` есть свойства `width`,  `height`, `rught`. Поэтому в `Table.js` мы можем написать так:
+                            `Table.js`:
+                                `
+                                    onMousedown(event) {
+                                        if (event.target.dataset.resize) {
+                                            const $resizer = $(event.target);
+                                            const $parent = $resizer.closest("[data-type='resizable']");
+                                            console.log($parent.getCoords());
+                                        }
+                                    }
+                                `
+                                Проверяем в консоли, видим объект со свойствами `width`,  `height`, `rught`. `width` - это ширина колонки, которую мы будем ресайзить. `right` - это правая граница колонки, которую мы будем ресайзить. `height` - высота колонки, которую мы будем ресайзить. 
+            * Теперь надо отслеживать изменение курсора при перемещении. Поэтому в классе `Table` изменим коллбэк `onMousedown`, вставив туда листенер `mousemove`.
+                `Table.js`:
+                    `
+                        onMousedown(event) {
+                            if (event.target.dataset.resize) {
+                                const $resizer = $(event.target);
+                                const $parent = $resizer.closest("[data-type='resizable']");
+                                const coords = $parent.getCoords();
+                                document.onmousemove = e => {
+                                    const delta = e.x - coords.right;
+                                    console.log(delta);
+                                };
+                            }
+                        }
+                    `
+                    Кликаем, двигаем мышку, видим в консоли разницу в пикселях. Это и есть то, на сколько мы сдвинули курсор. Но нам нужно не это, а новая ширина колонки. Поэтому надо сосчитать её новую ширину и изменить её стиль `width`:
+                        `Table.js` => `onMousedown`:
+                            `
+                                document.onmousemove = e => {
+                                    const delta = e.x - coords.right;
+                                    const value = coords.width + delta;
+                                    $parent.$nativeElement.style.width = value + "px";
+                                };
+                            `
+                    Меняем в браузере её ширину, всё ок.
+                    Но когда мы отпускаем мышку, она всё ещё ресайзится. Поэтому надо добавить листенер `mouseup`:
+                        `Table.js` => `onMousedown`:
+                            `
+                                document.onmouseup = () => {
+                                    document.onmousemove = null;
+                                };
+                            `
+                    Теперь всё ок.
+        * Теперь надо сделать так, чтобы менялась ширина у всех ячеек в колонке. Для этого надо им всем дать дата-атрибуты как у колонки. Назову их `data-col`. Для этого в метод `toColumn` передам ещё индекс, который и есть номер колонки.
+            `table.template.js`:
+                `
+                    function toColumn(el, index) {
+                        return `
+                            <div class="column" data-type="resizable" data-col="${index}">
+                            ${el}
+                            <div class="col-resize" data-resize="col"></div> 
+                            </div>
+                        `;
+                    }
+                `
+            Теперь в каждой верхней ячейке есть дата-атрибут `data-col`, который равен номеру колонки. проверяем это в devTools.
+            Теперб нужно такие же индексы задать для каждой из ячеек.
+            Это метод `toCell`. Передадим ему индекс колонки и индекс ряда.
+                `table.template.js`:
+                    `
+                        function toCell(_, col) {
+                            return `
+                                <div class="cell" contenteditable data-col="${col}"></div>
+                            `;
+                        }
+                    `
+            Теперь в каждой ячейке есть дата-атрибут `data-col`, который равен номеру колонки. проверяем это в devTools.
+            * Давайте теперь сделать в классе `Dom` геттер на `dataset`.
+                `Dom.js`:
+                    `
+                        export class Dom {
+                            ...
+                            get data() {
+                                return this.$nativeElement.dataset;
+                            }
+                        }
+                    `
+            Глянем в консоли:
+                `Table.js`:
+                    `
+                        onMousedown(event) {
+                            if (event.target.dataset.resize) {
+                                const $resizer = $(event.target);
+                                const $parent = $resizer.closest("[data-type='resizable']");
+                                const coords = $parent.getCoords();
+                                console.log($parent.data);
+                                ...
+                    `
+                        Кликаем на `resizer`, видим в консоли `dataset` типа `{type: 'resizable', col: '6'}`
+            * Теперь надо сделать так, чтобы при ресайзе менялась ширина всех ячеек в колонке. Для этого надо найти все ячейки в колонке. Для этого в классе `Table` надо обратиться к `Dom`-дереву и поменять у всех ячеек `style.width`
+                `Table` => `onMousedown`:
+                    `
+                        ...
+                        document.onmousemove = (e) => {
+                            const delta = e.x - coords.right;
+                            const value = coords.width + delta;
+                            $parent.$nativeElement.style.width = value + "px";
+                            document
+                                .querySelectorAll(`[data-col="${$parent.data.col}"]`)
+                                .forEach((el) => (el.style.width = value + "px"));
+                        ...
+                    `
+            Ресайзим, работает. Но! Есть проблемы с производительностью. Коллбэк `mousemove` вызывается очень часто, и каждый раз мы делаем запрос к `Dom`-дереву. Это очень ресурсозатратно. Поэтому надо сделать так, чтобы мы не обращались к `Dom`-дереву каждый раз, а только один раз, когда начинаем ресайзить. Для этого надо гаходить все ячейки не внутри коллбэка на `mousemove`, а внутри коллбэка на `mousedown`. Т.е. надо найти все ячейки в колонке и сохранить их в переменную. А потом уже в коллбэке на `mousemove` менять их ширину. (так же, поменяем `document` на `this.$root`).
+                `dom.js`:
+                    `
+                        export class Dom {
+                            ...
+                            findAll(selector) {
+                                return this.$nativeElement.querySelectorAll(selector);
+                            }
+                        }
+                    `
+                `Table` => `onMousedown`:
+                    `
+                        ...
+                        const cells = this.$root.findAll(`[data-col="${$parent.data.col}"]`);
+                        ...
+                        document.onmousemove = (e) => {
+                            ...
+                            cells.forEach((el) => (el.style.width = value + "px"));
+                        ...
+                    `
+    6. 4. Изменяем размер рядов.
+        Рядам мы не задавали дата-атрибуты, поэтому надо их задать. Для этого в методе `createRow` дадим им дата-атрибут `data-type="resizable"`:
+            `table.template.js`:
+                `
+                    function createRow(index, content) {
+                        const resize = index ? '<div class="row-resize" data-resize="row"></div>' : ""
+                        return `
+                            <div class="row" data-type="resizable">
+                            <div class="row-info">
+                                ${index}
+                                ${resize}
+                            </div>
+                            <div class="row-data">${content}</div>
+                            </div>  
+                        `;
+                    }
+                `
+            Но в классе `Table` => `onMousedown` в коллбэке на `onmousemove` мы берём поле `right` и меняем ширину ячеек. А тут мы должны менять высоту. Поэтому надо тут делать проверку `col` или `row`.
+            Запишем её в переменную `type`:
+                `Table` => `onMousedown` (full):
+                    `
+                        onMousedown(event) {
+                            if (event.target.dataset.resize) {
+                                const $resizer = $(event.target);
+                                const $parent = $resizer.closest("[data-type='resizable']");
+                                const coords = $parent.getCoords();
+                                const type = $resizer.data.resize;
+                                const cells = this.$root.findAll(`[data-col="${$parent.data.col}"]`);
+                                document.onmousemove = (e) => {
+                                    if (type === "col") {
+                                    const delta = e.x - coords.right;
+                                    const value = coords.width + delta;
+                                    $parent.$nativeElement.style.width = value + "px";
+                                    cells.forEach((el) => (el.style.width = value + "px"));
+                                } else {
+                                    const delta = e.y - coords.bottom;
+                                    const value = coords.height + delta;
+                                    $parent.$nativeElement.style.height = value + "px";
+                                    }
+                                };
+                                document.onmouseup = () => {
+                                    document.onmousemove = null;
+                                };
+                            }
+                        }
+                    `
+        * Но то, что мы используем `$nativeElement` в js, это не норм. Надо создать метод `css(styles)` по аналогии с `jquery` и использовать его.
+            `Dom.js`:
+                `
+                    export class Dom {
+                        ...
+                        css(styles = {}) {
+                            Object.keys(styles).forEach((key) => {
+                                this.$nativeElement.style[key] = styles[key];
+                            });
+                        }
+                    }
+                `
+            `Table` => `onMousedown`:
+                `
+                    ...
+                    $parent.css({width: value + "px"});
+                    ...
+                    $parent.css({height: value + "px"});
+                    ...
+                `
+        *** Сейчас давайте решим проблему с ресайзером. ***
+        * Когда мы ресайзим колонку или ряд, он исчезает. Так как он уходит из-под `hover`.
+        Поэтому сделаем так (1. на `mousedown` ставить `opacity: 1`, а на `mouseup` - `opacity: 0`. 2. на `hover` ставить `opacity: 1 !important`):
+            `Table.js`:
+                `
+                    onMousedown(event) {
+                        if (event.target.dataset.resize) {
+                            ...
+                            $resizer.css({opacity: 1});
+                            ...
+                            document.onmouseup = () => {
+                                document.onmousemove = null;
+                                document.onmouseup = null;
+                                $resizer.css({opacity: 0});
+                            };
+                        }
+                    }
+                `
+            `table.scss`:
+                `
+                    .col-resize,
+                    .row-resize {
+                        ...
+                        &:hover {
+                            opacity: 1 !important;
+                        }
+                `
+
+        Теперь следующая проблема с ресайзером. Надо, чтобы он был как в реальном `Excel`. Когда мы ресайзим там,допустим, колонку, сначала идёт только ресайзер (не весь столбец), а потом, когда мы отпускаем мышку, весь столбец ресайзится. Так и надо сделать у нас.
+            `Table.js` => `onMousedown(event)` (full):
+                `
+                    onMousedown(event) {
+                        if (event.target.dataset.resize) {
+                            const $resizer = $(event.target);
+                            const $parent = $resizer.closest("[data-type='resizable']");
+                            const coords = $parent.getCoords();
+                            const type = $resizer.data.resize;
+                            let value;
+                            $resizer.css({opacity: 1});
+                            const cells = this.$root.findAll(`[data-col="${$parent.data.col}"]`);
+                            document.onmousemove = (e) => {
+                                if (type === "col") {
+                                    const delta = e.x - coords.right;
+                                    value = coords.width + delta;
+                                } else {
+                                    const delta = e.y - coords.bottom;
+                                    value = coords.height + delta;
+                                }
+                            };
+                            document.onmouseup = () => {
+                                document.onmousemove = null;
+                                document.onmouseup = null;
+                                if (type === "col") {
+                                    $parent.css({width: value + "px"});
+                                    cells.forEach((el) => (el.style.width = value + "px"));
+                                } else {
+                                    $parent.css({height: value + "px"});
+                                }
+                                $resizer.css({opacity: 0});
+                            };
+                        }
+                    }
+                `
+        Проверяем в браузере, ок. Только ресайзер исчезает, когда мы ресайзим. Надо менять у него свойство `right` и `bottom` у рядов и колонок соответственно.
+            `Tabls.js` => `onMousedown(event)`:
+                `
+                    document.onmousemove = (e) => {
+                        if (type === "col") {
+                            ...
+                            value = coords.width + delta;
+                            $resizer.css({right: -delta + "px"});  // New
+                        } else {
+                            ...
+                            value = coords.height + delta;
+                            $resizer.css({bottom: -delta + "px"});  // New
+                        }
+                    };
+                `
+            А также, добавить ресайзеру `z-index`, чтобы он был поверх всего:
+            `table.scss`:
+                `
+                    .col-resize,
+                    .row-resize {
+                        ...
+                        z-index: 1000;
+                `
+            Теперь надо вернуть на знаечение 0 свойству `right` и `bottom` у ресайзера рядов и колонок соответственно.
+                `Table.js` => `onMousedown(event)`:
+                    `
+                        ...
+                        document.onmouseup = () => {
+                            document.onmousemove = null;
+                            document.onmouseup = null;
+
+                            if (type === "col") {
+                                $parent.css({width: value + "px", right: 0});
+                                cells.forEach((el) => (el.style.width = value + "px"));
+                            } else {
+                                $parent.css({height: value + "px", bottom: 0});
+                            }
+                            ...
+                    `
+        Теперь надо сделать так, чтобы ресайзер колонок был во всю высоту, а рядов - ширину, таблицы. Для этого для ресайзера колонок дадим ресайзеру `bottom: -5000px`, а строк - `right: -5000px`
+            `Table.js`:
+                `
+                    onMousedown(event) {
+                        if (event.target.dataset.resize) {
+                            ...
+                            const sideProp = type === "col" ? "bottom" : "right";
+                            ...
+                            $resizer.css({
+                                opacity: 1,
+                                [sideProp]: "-5000px",
+                            });
+                            ...
+                            document.onmouseup = () => {
+                                ...
+                                $resizer.css({ opacity: 0, [sideProp]: 0 });
+                            };
+                        }
+                    }
+                `
+
+        * Также нам больше не нужна переменная `cells` (удаляем её, а значение просто переносим).
+            `Table.js` => `onMousedown(event)`:
+                `
+                    document.onmouseup = () => {
+                        ...
+                        if (type === "col") {
+                            ...
+                            this.$root.findAll(`[data-col="${$parent.data.col}"]`).forEach((el) => (el.style.width = value + "px"));
+                            ...
+                `
+        *** Давайте теперь вынесим логику метода `onMousedown` в отдельный файл.  ***
+            * Для  этого создадим файл `components/table/table.resize.js`.
+                `table.resize.js`:
+                    `
+                        import { $ } from "@core/dom";
+                        export function resizeHandler($root, event) {
+                            const $resizer = $(event.target);
+                            const $parent = $resizer.closest("[data-type='resizable']");
+                            const coords = $parent.getCoords();
+                            const type = $resizer.data.resize;
+                            const sideProp = type === "col" ? "bottom" : "right";
+                            let value;
+                            $resizer.css({
+                                opacity: 1,
+                                [sideProp]: "-5000px",
+                            });
+                            document.onmousemove = (e) => {
+                                if (type === "col") {
+                                const delta = e.x - coords.right;
+                                value = coords.width + delta;
+                                $resizer.css({ right: -delta + "px" });
+                                } else {
+                                const delta = e.y - coords.bottom;
+                                value = coords.height + delta;
+                                $resizer.css({ bottom: -delta + "px" });
+                                }
+                            };
+                            document.onmouseup = () => {
+                                document.onmousemove = null;
+                                document.onmouseup = null;
+                                if (type === "col") {
+                                    $parent.css({ width: value + "px", right: 0 });
+                                    $root
+                                        .findAll(`[data-col="${$parent.data.col}"]`)
+                                        .forEach((el) => (el.style.width = value + "px"));
+                                    $resizer.css({ right: 0 });
+                                } else {
+                                    $parent.css({ height: value + "px", bottom: 0 });
+                                    $resizer.css({ bottom: 0 });
+                                }
+                                $resizer.css({ opacity: 0, [sideProp]: 0 });
+                            };
+                        }
+                    `
+                    `Table.js`:
+                        `
+                            onMousedown(event) {
+                                if (event.target.dataset.resize) {
+                                   resizeHandler(this.$root, event);
+                                }
+                            }
+                        `
+            Вынесли, красавы. Основной код стал сильно чище. Радуемся этому.
+            Теперь условие `event.target.dataset.resize` тоде вынесим в отдельный файл. Только другой. Назовём его `components/table/table.functions.js`.
+                `table.functions.js`:
+                    `
+                        export function shouldResize(event) {
+                            return event.target.dataset.resize;
+                        }
+                    `
+                    `Table.js`:
+                        `
+                            import { shouldResize } from "./table.functions";
+                            ...
+                            onMousedown(event) {
+                                if (shouldResize(event)) {
+                                    resizeHandler(this.$root, event);
+                                }
+                            }
+                        `
+        Всё, доделали ресайзер, круто. Надо залить это всё теперь в гит.
+        
 
 
-
-
-    *** Начать с урока 03_12 00:00 ***
+    *** Начать с урока 04_08 00:00 ***
+    *** С пацанами закончил на 370 строчке ***
