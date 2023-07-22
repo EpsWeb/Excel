@@ -13,6 +13,7 @@
     "no-tabs": "off",
     "no-trailing-spaces": "off",
     "no-unused-vars": "off",
+    "max-len": "off",
     "object-curly-spacing": "off",
     "operator-linebreak": "off",
     "padded-blocks": "off",
