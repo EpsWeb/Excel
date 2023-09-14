@@ -3,7 +3,7 @@ import { capitalize } from "./util"
 export class DomListener {
   constructor($root, listeners = []) {
     if (!$root) {
-      throw new Error('No root element provided for DomListenet!')
+      throw new Error('No root element provided for DomListener!')
     }
     this.$root = $root
     this.listeners = listeners

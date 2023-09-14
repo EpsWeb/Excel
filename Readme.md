@@ -349,9 +349,9 @@
         Всё, подключили. 
     Задаём body шрифт `Roboto` (если он вдруг не загрузится, то по дефолту `sans-serif`):
         `
-        body {
-                font-family: 'Roboto', sans-serif;
-            }
+            body {
+                    font-family: 'Roboto', sans-serif;
+                }
         `
     И другие стили:
         * {
@@ -400,102 +400,170 @@
             }
         `
 
-4. 3. Стили для header:
-    Тут удобно будет использовать `display: flex,  justify-content: space-between` 
-    Нам нужны иконки для кнопок:
-    Гуглим `material icons`. Где-то пятая ссылка ведёт на гитхаб. Там внизу копируем `link`:
-        `<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">`. Вставляем в `<header></header>` `index.html`
-    На сайте `fonts.google.com` ищем `exit to app` и `delete`, копируем, меняем вёрстку в `index.html`:
-        * `
-            <div class="excel__header">
+   4. 3. Стили для header:
+       Тут удобно будет использовать `display: flex,  justify-content: space-between` 
+       Нам нужны иконки для кнопок:
+       Гуглим `material icons`. Где-то пятая ссылка ведёт на гитхаб. Там внизу копируем `link`:
+           `<link href="https://fonts.googleapis.com/css2?family=Material+Icons" rel="stylesheet">`. Вставляем в `<header></header>` `index.html`
+       На сайте `fonts.google.com` ищем `exit to app` и `delete`, копируем, меняем вёрстку в `index.html`:
+           * `
+               <div class="excel__header">
 
-                <input type="text" class="input" value="New table">
+                   <input type="text" class="input" value="New table">
 
-                <div>
-                    <div class="button">
-                        <span class="material-icons">
-                            delete
-                        </span>
-                    </div>
+                   <div>
+                       <div class="button">
+                           <span class="material-icons">
+                               delete
+                           </span>
+                       </div>
                     
-                    <div class="button">
-                        <span class="material-icons">
-                            exit_to_app
-                        </span>
-                    </div>
-                </div>
+                       <div class="button">
+                           <span class="material-icons">
+                               exit_to_app
+                           </span>
+                       </div>
+                   </div>
 
+               </div>
+           `
+       `npm start`. Видим, что элементы появились, но нет стилей. Добавим их. Сначала подумаем какие. Сама таблица будет скроллэбл. Остальные вещи - Header, Toolbar, Formula будут всегда наверху на одном и том же месте. Поэтому сделаем их `position absolute`, прибитые по краям, один под другим.
+       `_variables.scss`:
+           `$header-height: 34px;`
+       `_header.scss`:
+      * `
+          .excel__header {
+              position: absolute;
+              top: 0;
+              right: 0;
+              left: 0;
+              height: $header-height;
+              padding: 8px 4px 0;
+              display: flex;
+              justify-content: space-between;
+              //temp
+              background-color: antiquewhite;
+              & .input {
+                  margin: 0;
+                  padding: 2px 7px;
+                  min-width: 1px;
+                  color: #000;
+                  border: 1px solid transparent;
+                  border-radius: 2px;
+                  height: 20px;
+                  font-size: 18px;
+                  line-height: 22;
+                  outline: none;
+                  &:hover {
+                      border: 1px solid $border-color;
+                  }
+                  &:focus {
+                      border: 2px solid #1a73e8;
+                  }
+              }
+              & .button {
+              }
+          }
+      `
+     temp background даём, чтобы видеть, где находится наш хэдер.
+     У инпута и ячеек бордер будет одного цвета, поэтому вынесем в переменную:
+         `_variables`: 
+             ` $border-color: #c0c0c0;`
+     Удаляем временый background-color.
+     Кнопки справа будут такие же, как и  в туллбаре, только разнах цветов. Поэтому сделаем для этого миксин:
+         `_mixins.scss`:
+             `
+                  @mixin button($color: green) {
+                      height: 24px;
+                      min-width: 24px;
+                      padding: 3px;
+                      text-align: center;
+                      position: relative;
+                      display: inline-block;
+                      color: rgba(0, 0, 0, 0.7);
+                      & span {
+                           font-size: 18px;
+                      }
+                      &:active, &.active {
+                          color: $color;
+                      }
+                      &:hover {
+                          background-color: #eee;
+                          cursor: pointer;
+                      }
+                  }
+             `
+
+       Применяем миксин:
+       `_header.scss`:
+       `
+           & .button {
+               @include button(red);
+           }
+       `
+     Смотрим в браузере, радуемся, что всё ок. Дальше - Toolbar.
+
+4. 4. Вёрстка Toolbar:
+     Ищем иконки: Сайт `fonts.google.com` (или в поиске `material icons`) => Material icons, filled => Поиск по категориям => `Text formatting` => Берём иконки: `format_align_left`, `format_align_center`, `format_align_right`, `format_bold`, `format_italic`, `format_underlined`. Вставляем в html => в класс `excel__toolbar`
+    * `index.html`:
+        `
+            <div class="excel__toolbar">
+                <div class="button">
+                    <span class="material-icons">
+                        format_align_left
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="material-icons">
+                        format_align_center
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="material-icons">
+                        format_align_right
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="material-icons">
+                        format_bold
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="material-icons">
+                        format_italic
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="material-icons">
+                        format_underlined
+                    </span>
+                </div>
             </div>
         `
-    `npm start`. Видим, что элементы появились, но нет стилей. Добавим их. Сначала подумаем какие. Сама таблица будет скроллэбл. Остальные вещи - Header, Toolbar, Formula будут всегда наверху на одном и том же месте. Поэтому сделаем их `position absolute`, прибитые по краям, один под другим.
-    `_variables.scss`:
-        `$header-height: 34px;`
-    `_header.scss`:
-    * `
-        .excel__header {
-            position: absolute;
-            top: 0;
-            right: 0;
-            left: 0;
-            height: $header-height;
-            padding: 8px 4px 0;
-            display: flex;
-            justify-content: space-between;
-
-            //temp
-
-            background-color: antiquewhite;
-
-            & .input {
-                margin: 0;
-                padding: 2px 7px;
-                min-width: 1px;
-                color: #000;
-                border: 1px solid transparent;
-                border-radius: 2px;
-                height: 20px;
-                font-size: 18px;
-                line-height: 22;
-                outline: none;
-
-                &:hover {
-                    border: 1px solid $border-color;
-                }
-
-                &:focus {
-                    border: 2px solid #1a73e8;
-                }
-            }
-
-            & .button {
-
-            }
-        }
-    `
-    temp background даём, чтобы видеть, где находится наш хэдер.
-    У инпута и ячеек бордер будет одного цвета, поэтому вынесем в переменную:
-        `_variables`: 
-            ` $border-color: #c0c0c0;`
-    Удаляем временый background-color.
-    Кнопки справа будут такие же, как и  в туллбаре, только разнах цветов. Поэтому сделаем для этого миксин.
-    Смотрим в браузере, радуемся, что всё ок. Дальше - Toolbar.
-
-4. 4. Стили для Toolbar:
-    `__variables.scss`:
+   
+    * `__variables.scss`:
          `$toolbar-height: 40px;`
      `toolbar.scss`:
         * `
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            height: $toolbar-height;
-            // temp
-            background-color: aqua;
+            .excel__toolbar {
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 0;
+                height: $toolbar-height;
+                border-top: 1px solid #c0c0c0;
+                border-bottom: 1px solid #c0c0c0;
+                padding: 7px 10px;
+                display: flex;
+                & .button {
+                    @include button();
+                }
+                // temp
+                background-color: aqua;
+            }
         `
-        * Если мы так и оставим top: 0, то туллбар будет на том же месте, что и header. Поэтому дадим `top: $header-height;`
-        Удаляем temp background-color
-        Ищем иконки: Сайт `fonts.google.com` (или в поиске `material icons`) => Material icons, filled => Поиск по категориям => `Text formatting` => Берём иконки: `format_align_left`, `format_align_center`, `format_align_right`, `format_bold`, `format_italic`, `format_underlined`. Вставляем в html => в класс `excel__toolbar`
+          * Если мы так и оставим `top: 0`, то туллбар будет на том же месте, что и header. Поэтому дадим `top: $header-height;`
+          Удаляем `temp background-color`
 4. 5. Стили для Formula
     `index.html` => class=`excel__formula`: 
         `
@@ -503,7 +571,7 @@
             <div class="input" contenteditable></div>
         `
         * `contenteditable` у дива делаем его инпутом, но без инпутовских стилей. Т.е. то, что нам нужно. 
-        Сейчас, если начнём вводить некорректные слова, они будут подчеркнутф красным. Это `spellcheck`. Чтобы его отключить, добавим к `contenteditable spellcheck="false"`
+        Сейчас, если начнём вводить некорректные слова, они будут подчеркнуты красным. Это `spellcheck`. Чтобы его отключить, добавим к `contenteditable spellcheck="false"`
     `variables.scss`:
         `$formula-height: 24px;`
         `$info-cell-width: 40px;`
@@ -518,7 +586,6 @@
                 display: flex;
                 align-items: center;
                 border-bottom: 1px solid $border-color;
-
                 .info {
                     font-size: 18px;
                     font-style: italic;
@@ -527,7 +594,6 @@
                     border-right: 1px solid $border-color;
                     min-width: $info-cell-width;
                 }
-                
                 .input {
                     padding: 4px;
                     font-size: 12px;
@@ -640,7 +706,7 @@
         Во втором ряду не виден border-outline, поэтому добавим 
             `.excel__table`: `padding-bottom: 2px;`
     Уменьшим размер общий шрифта: `index.scss` => `.excel` => `font-size: .8rem;`
-    Удалим класс `selected` у дивас контентом `A2`
+    Удалим класс `selected` у дива с контентом `A2`
     Смотрим на то, что вышло. При клике на ячейки появляется outline. Поэтому добавим:
         `table.scss` => `.cell`: `outline: none;`
     * В дальнейшем мы будем программно добавлять outline по клиу на ячейку с помощью класса `selected`
@@ -668,7 +734,6 @@
         `
             @import "variables";
             @import "mixins";
-
             .db {
             &__header {
                 position: fixed;
@@ -691,7 +756,6 @@
             &__table {
             }
             }
-
         `
 
     `_variables.scss`: Добавим `$db-header-heigth: 64px;`
@@ -724,7 +788,6 @@
                 color: #000;
                 text-align: center;
                 transition: all .1s ease;
-
                 &:hover {
                     color: green;
                     border-color: green;
@@ -764,7 +827,6 @@
         `
             &__table {
                 padding: 1rem;
-
                 &__header {
                     display: flex;
                     justify-content: space-between;
@@ -776,7 +838,7 @@
                 }
             }
         `
-    Name и Date of opening разошлись по разным сестам, всё ок.
+    Name и Date of opening разошлись по разным местам, всё ок.
     Теперь сделаем список таблиц
         * `index.html`:
             `
@@ -807,17 +869,14 @@
                     justify-content: space-between;
                     align-items: center;
                     padding: 12px 14px 12px 16px;
-
                     &:hover {
                         background-color: #e6f4ea;
                         border-radius: 25px;
                     }
-
                     a { 
                         text-decoration: none;
                         color: #202124;
                         font-size: 14px;
-
                         &:hover {
                             text-decoration: underline;
                         }
@@ -859,31 +918,30 @@
     5. 1. Создадим новую ветку, в которой мы будем разрабатывать фреймворк. Назовём её `framework-start`
         `git checkout -b 'framework-start'`
     Рисуем общую диграмму наследования (`High order diagram.drawio`)
-    Все 4 компонента страницы будут наследоваться от класса `ExcelComponent`, ктоорый будет наследоваться от класса `DomListener`
+    Все 4 компонента страницы будут наследоваться от класса `ExcelComponent`, который будет наследоваться от класса `DomListener`
     Эти 4 компонента будут входить в общего родителя-класс `Excel`
+   
     `index.html`: удалим console.log
-    * Теперь наконец приступим к логике, js. Для начала создадим базовую сткуктуру классов
+
+    * Теперь наконец приступим к логике, js. Для начала создадим базовую структуру классов
     * В `webpack.config` мы создавали alias `@core` -> `src/core`. Поэтому создадим папку `src/core`. В ней будем хранить основные вещи. Классы мы будем создавать с большой буквы, остальные вещи - с маленькой.
 
     * Создадим файл `src/core/DomListener.js`. В нём:
         `
-            export class DomListener {
-                        
+            export class DomListener { 
             }
-
         `
     EsLint ругается на `no-trailing-spaces`. Поэтому добавлю в `.eslintrc` => `"no-trailing-spaces": "off",`
     * Теперь создадим файл `src/core/ExcelComponent.js`, который будет наследоваться от класса `DomListener`:
+    * `src/core/ExcelComponent.js`:
         `
             import { DomListener } from "./DomListener";
-
             export class ExcelComponent extends DomListener {
             // возвращает шаблон компонета
             toHTML() {
                     return "";
                 }
             }
-
         `
     Теперь создадим файл `src/components/excel/Excel.js`. Это будет сама страница Excel.
 
@@ -893,7 +951,6 @@
             const excel = new Excel('#app', {
                 components: [],
             })
-
             console.log('Excel', excel);
         `
     * `Excel.js`:
@@ -904,7 +961,6 @@
                 this.components = options.components
                 }
             }
-
         `
     * Теперь создадим сами компоненты. Первый - `Header`. Создаём файл `src/components/header/Header.js`. Можно было бы назвать его `HeaderComponent`. Но у нас их будет не так много, и, пожалуй, это лишнее. Мы и так поймём, что это за Header. 
         `Header.js`:
@@ -912,7 +968,6 @@
                 import { ExcelComponent } from "@core/ExcelComponent";
                 export class Header extends ExcelComponent {
                 }
-
             `
     Аналогично создаём классы `Toolbar, Formula, Table`
     Теперь зарегистрируем эти компоненты в их родительском классе `Excel`.
@@ -931,7 +986,6 @@
                             this.$el = document.querySelector(selector);
                             this.components = options.components;
                         }
-
                         render() {
                             console.log(this.$el);
                         }
@@ -942,10 +996,9 @@
                     const excel = new Excel('#app', {
                         components: [Header, Toolbar, Formula, Table],
                     })
-
                     excel.render()
                 `
-    * Теперь мы хотим в метода `render` добавлять элементу `$el` наши компоненты. Сначала положим туда тестовый элемент, чтобы проверить, добавится ли он:
+    * Теперь мы хотим в методе `render` добавлять элементу `$el` наши компоненты. Сначала положим туда тестовый элемент, чтобы проверить, добавится ли он:
         * `Excel.js`:
             `
                 render() {
@@ -959,15 +1012,12 @@
             `
                 getRoot() {
                     const $root = document.createElement('div')
-                    
                     this.components.forEach(Component => {
                         const component = new Component()
                         $root.insertAdjacentElement('beforeend', component.toHTML())
                     });
-
                     return $root
                 }
-
                 render() {
                     this.$el.append(this.getRoot())
                 }
@@ -986,21 +1036,35 @@
     * Теперь посмотрим на файл `excel.html`. У главного дива есть класс `excel`. У остальных тоже классы типа `excel__header`. Мы должны следовать этому стайл-гайду, чтобы наша вёрстка не отличалась от той, что хранится в файле `excel.html`.
     Для этого добавим по статическому полю `className` в каждый из компонентов.
         * Например, в `Header.js` это будет так выглядеть: `static className="excel__header"`
-        * А в `Excel.js` добавим так: `$root.classList.add('excel')`
+          * А в `Excel.js` добавим так: `$root.classList.add('excel')`
+          `Excel.js`:
+            `
+            getRoot() {
+                const $root = document.createElement('div')
+                $root.classList.add('excel')
+                this.components.forEach(Component => {
+                const $el = document.createElement('div')
+                const className = Component.className
+                $el.classList.add(className)
+                const component = new Component()
+                $el.innerHTML = component.toHTML()
+                $root.append($el)
+                })
+                return $root
+            } 
+            `
 
-    * Поговорим о классе `DomListener`. Это класс, который будет отвечать за добавление листенеров. И, конечно, ему надо знать на какой элемент ему надо эти листенеры навесить. Поэтому ему в конструктор мы дадим `$root`-элемент, на который и будем вешать прослушку событий. И, если, его не будет, будем кидать ошибку.
+    * Поговорим о классе `DomListener`. Это класс, который будет отвечать за добавление листенеров. И, конечно, ему надо знать на какой элемент ему надо эти листенеры навесить. Поэтому ему в конструктор мы дадим `$root`-элемент, на который и будем вешать прослушку событий. И, если его не будет, будем кидать ошибку.
         * `core/DomListener.js`: 
             `
                 export class DomListener {
                     constructor($root) {
                         if (!$root) {
-                            throw new Error('No root element provided for DomListenet!')
+                            throw new Error('No root element provided for DomListener!')
                         }
-
                         this.$root = $root
                     }
                 }
-
             `
         Сейчас, если мы посмотрим в консоль, будет ошибка, так как мы этот `$root` не передаём. `DomListener` мы наследуем в классе `ExcelComponent`. Поэтому дадим его в этом конструкторе класса каждого компонента.
             * `Excel.js` :
@@ -1012,7 +1076,7 @@
                             const $el = document.createElement('div')
                             const className = Component.className
                             $el.classList.add(className)
-                            const component = new Component($el)
+                            const component = new Component($el)   // new $el
                             $el.innerHTML = component.toHTML()
                             $root.append($el)
                         })
@@ -1020,16 +1084,16 @@
                     }
                 `
             * Переделали мы немного тут структуру. Теперь мы создаём внутренний элемент `$el`, в который складываем `component.toHTML()`, и его добавляем, как элемент в главный `$root`
-        * Смотрим в браузере структуру HTML. Радуемся правильным названиям классов у главного дива `excel` и шлавных классов каждого из компонентов.
+        * Смотрим в браузере структуру HTML. Радуемся правильным названиям классов у главного дива `excel` и главных классов каждого из компонентов.
         * Теперь перенесём вёрстку в компоненты. 
         * Покажу на примере `Header`: 
             В файл `Header.js` копипастим внутренности `<div class="excel__header">`.
         Аналогично с `Toolbar, Formula, Table`.
         * Смотрим в браузере, радуемся правильной вёрстке
 
-        * Теперь порафакторим код. В классе `Excel.js` мы работаем с такими методами, как `document.createElement`, `classList.add`. Вынесем их в отдельный `healper`-класс.
+        * Теперь порефакторим код. В классе `Excel.js` мы работаем с такими методами, как `document.createElement`, `classList.add`. Вынесем их в отдельный `helper`-класс.
             Создадим файл `core/Dom.js`. Это будет утилита, позволяющая проще взаимодействовать с dom-деревом. Аля свой jquery.
-            `dom.js`:
+            * `dom.js`:
                 `
                     export class Dom {    
                     }
@@ -1045,7 +1109,7 @@
                     }
                 `
             Теперь воспользуемся этим новым классом `Dom` в классе `Excel`:
-                `Excel.js`:
+                * `Excel.js`:
                     `
                         getRoot() {
                             const $root = $.create('div', 'excel')
@@ -1055,16 +1119,15 @@
                                 $el.innerHTML = component.toHTML()
                                 $root.append($el)
                             })
-
                             return $root
                         }
                     `
-            Теперь сделаем так, чтобы в конструктор `$` мы давали либо селектор, либо `dom`-ноду. Если селектор, то будем вызывать `document.querySelector`, если ноду- то её сразу записывать в переменную `$nativeElement` (*** в курсе эта переменная называется `$el`, но я переименовал, потому что возникает путаница с переменной `$el` из класса `Excel` ***):
+            Теперь сделаем так, чтобы в конструктор `$` мы давали либо селектор, либо `dom`-ноду. Если селектор, то будем вызывать `document.querySelector`, если ноду - то её сразу записывать в переменную `nativeElement` (*** в курсе эта переменная называется `$el`, но я переименовал, потому что возникает путаница с переменной `$el` из класса `Excel` ***):
                 * `dom.js`:
                   `
                     export class Dom {    
                         constructor(selectorOrNode) {
-                            this.$nativeElement = typeof selectorOrNode === 'string'
+                            this.nativeElement = typeof selectorOrNode === 'string'
                                 ? document.querySelector(selectorOrNode)
                                 : selectorOrNode
                         }
@@ -1083,33 +1146,33 @@
                     * Обратим внимание, что теперь мы возвращаем `$(el)`, а не просто `el`, как раньше. Чтобы Это был инстанс класса `Dom`, а не просто дом-нода.
             * Т.е. элемент класса `Dom` будет ассоциироваться с конкретной `Dom`-нодой
 
-            Теперь сделаем метод `html`, который будет аналогичен методы `html` в `jquery`. Его суть: если мы передаём какой-то параметр в этот метод, то мы переписываем `innerHTML` элемента `$nativeElement`. Если ничего не передаём, то просто вернуть его `outerHTML`:
-                `dom.js` -> внутри класса `Dom`:
+            Теперь сделаем метод `html`, который будет аналогичен методы `html` в `jquery`. Его суть: если мы передаём какой-то параметр в этот метод, то мы переписываем `innerHTML` элемента `nativeElement`. Если ничего не передаём, то просто вернуть его `outerHTML`:
+                * `dom.js` -> внутри класса `Dom`:
                     `
                         html(html) {
                             if (typeof html === 'string') {
-                                this.$nativeElement.innerHTML = html
+                                this.nativeElement.innerHTML = html
                                 return this
                             }
-                            return this.$nativeElement.outerHTML.trim()
+                            return this.nativeElement.outerHTML.trim()
                         }
                         clear() {
                             this.html('')
                             return this
                         }
                     `
-                        * Строка `return this` для того, чтобы мы могли чейнить. Т.е. писаьть код типа `$('div').html('<h1>test</h1>').clear()`. Это, кстати, популярный паттерн в js.
+                        * Строка `return this` для того, чтобы мы могли чейнить. Т.е. писать код типа `$('div').html('<h1>test</h1>').clear()`. Это, кстати, популярный паттерн в js.
                     Теперь `Excel.js`:
                         `$el.html(component.toHTML())` вместо `$el.innerHTML = component.toHTML()`
-            Смотрим в браузере, видим ошибку `$root.append is not a function`. Это потому что `$root` теперь у нас - эот элемент класса `Dom`, а не дом-нода. Тогда надо создать такой метод в классе `Dom`:
-            `dom.js` -> внутри класса `Dom`:
+            Смотрим в браузере, видим ошибку `$root.append is not a function`. Это потому что `$root` теперь у нас - это элемент класса `Dom`, а не дом-нода. Тогда надо создать такой метод в классе `Dom`:
+            * `dom.js` -> внутри класса `Dom`:
                 `
                     append(nodeOrDomObject) {
                         let node = nodeOrDomObject
                         if (nodeOrDomObject instanceof Dom) {
-                            node = nodeOrDomObject.$nativeElement
+                            node = nodeOrDomObject.nativeElement
                         }
-                        this.$el.appendChild(node)
+                        this.nativeElement.appendChild(node)
                         return this
                     }
                 `
@@ -1128,7 +1191,7 @@
         Для этого у нас есть класс `DomListener`, у него есть функционал добавления и удаления слушателей. Посмотрим на диаграмме, мы это писали.
         Поэтому добавим 2 метода - `initDomListeners` и `removeDomListeners` (пока пустые).
         Сделаем пока на примере Формулы. К ней в конструктор надо добавить объект `options`, в котором будет информация о листенерах
-            `Formula.js`:
+            * `Formula.js`:
                 `
                     constructor($root) {
                         super($root, {
@@ -1137,7 +1200,7 @@
                         })
                     }
                 `
-                * `Name` - это просто имя класса, чтобы легче бало отследить, где ошибка и прочее. И массив `listeners`. В нём будут перечислены все листенеры компонента. И конвенция наша такая, что если есть листененр, допустим `input`, значит, должен быть реализован метод `onInput`, в который мы передаём `event` и можем реагировать на это событие.
+                * `Name` - это просто имя класса, чтобы легче было отследить, где ошибка и прочее. И массив `listeners`. В нём будут перечислены все листенеры компонента. И конвенция наша такая, что если есть листенер, допустим `input`, значит, должен быть реализован метод `onInput`, в который мы передаём `event` и можем реагировать на это событие.
                     `DomListener`: 
                         `
                             export class DomListener {
@@ -1161,16 +1224,15 @@
                             }
                         `
             * Теперь надо подумать, где и когда вызывать метод  `initDomListeners`. Его надо вызывать тогда, когда загружен весь html. Иначе они не применятся. И вызывать его надо для каждого из компонентов. Надо выбрать централизованное место для всех компонентов. Это `ExcelComponent`. Реализуем там метод `init`:
-                `ExcelComponent`:
+                * `ExcelComponent`:
                     `
                         init() {
                             this.initDomListeners()
                         }
                     `
         * Сейчас сделаем так, чтобы в классе `Excel` поле `components` было действительно экземплярами классов `Header`, `Formula`, ...
-        Пока это просто функции. Выведем в кончоль, что такое `this.components`:
-            `Excel.js`:
-
+        Пока это просто функции. Выведем в консоль, что такое `this.components`:
+            * `Excel.js`:
                 `
                     render() {
                         this.$el.append(this.getRoot())
@@ -1189,7 +1251,7 @@
                     })
                     render() {
                         this.$el.append(this.getRoot())
-                        console.log('this.components', this.components);   // Видим, что это функции
+                        console.log('this.components', this.components);   // Видим, что это объекты
                     }
                 `
             Круто. Видим, что сейчас это объекты классов `Header`, `Formula`, ... и радуемся нашей объектно-ориентированности.
@@ -1212,18 +1274,18 @@
             
     5. 2. Добавление прослушки событий.
         * Сначала изобразим на диаграмме что конкретно мы хотим реализовать (диаграмма `Прослушка событий`).
-        * Допустим, у нас есть какой-то компонент (например, формула). У неё должен быть какой-то листенер (например, 'input'). Formula наследуется от класса `ExcelComponent`. Но он нас сейчас не интересует, и его мы пропустим. А нарисуем сразу класс `DomListener`. Этот класс должен определить, что при срабатывании такого листенера (input), нужн определить метод `onInput` и вызывать его внутри самого класса Formula.
+        * Допустим, у нас есть какой-то компонент (например, формула). У неё должен быть какой-то листенер (например, 'input'). Formula наследуется от класса `ExcelComponent`. Но он нас сейчас не интересует, и его мы пропустим. А нарисуем сразу класс `DomListener`. Этот класс должен определить, что при срабатывании такого листенера (input), нужно определить метод `onInput` и вызывать его внутри самого класса Formula.
         Вспомним, что у каждого компонента есть элемент `$root`, и это главный `Dom`-элемент компонента.
-        Т.е. в классе `DomListener` есть досьуп до элемента `$root`. И в этом классе мы будем вещать на листенеры вызов метода (например, на листенер `input` вызов метода `onInput`, который должен быть объявлен внутри класса компонента).
+        Т.е. в классе `DomListener` есть доступ до элемента `$root`. И в этом классе мы будем вешать на листенеры вызов метода (например, на листенер `input` вызов метода `onInput`, который должен быть объявлен внутри класса компонента).
         Теперь сделаем это.
             Сначала добавим в файл `dom.js` метод `on(eventType, callback)`, в котором сделаем `addEventListener`
-                `dom.js`
+                * `dom.js`
                     `
                         on(eventType, callback) {
-                            this.$nativeElement.addEventListener(eventType, callback)
+                            this.nativeElement.addEventListener(eventType, callback)
                         }
                     ` 
-                `DomListener.js`:
+                * `DomListener.js`:
                     `
                         initDomListeners() {
                             this.listeners.forEach(listener => {
@@ -1236,7 +1298,7 @@
             Для этого создадим файл `core/util.js`. В нём просто сделаем метод `capitalize`, пишущий имя с заглавной буквы.
                 `util.js`:
                     `
-                        // Purte functions
+                        // Pure functions
                         export function capitalize(string) {
                             if (typeof string !== "string" || !string) {
                                 return "";
@@ -1264,18 +1326,18 @@
             Проверим, вызывается ли метод, если мы явно укажем его название (вместо `methodName` -> `onInput`)
                 `DomListener.js`: `this.$root.on(listener, this['onInput'])`
                 Видим в консоли объект события при каждом вводе с формулу сивмола
-                Поменяем немного метод `onInput` в классе `Formula`, чтобы писался в кнсоль чистый текст, а не объект события
+                Поменяем немного метод `onInput` в классе `Formula`, чтобы писался в консоль чистый текст, а не объект события
                     `Formula`:
                         `
                             onInput(event) {
-                                console.log('Formula: onInput', event);
+                                console.log('Formula: onInput', event.target.textContent.trim());
                             }
                         `
                 Смотрим в консоль, всё ок. Видим чистый текст
             Вернём обратно на `methodName`
 
-        * Но тут есть нюанс. Если мы в `Formula` в методе `onInput` выведем в консоль `this`, то увидим, что контекст переопределился, и сейчас `this` - это html-нода, которую мы переопределили в следующей строчке в методе `on` файла `util.js`:
-            `this.$nativeElement.addEventListener(eventType, callback)`
+        * Но тут есть нюанс. Если мы в `Formula` в методе `onInput` выведем в консоль `this`, то увидим, что контекст переопределился, и сейчас `this` - это html-нода, которую мы переопределили в следующей строчке в методе `on` файла `dom.js`:
+            `this.nativeElement.addEventListener(eventType, callback)`
         Как же быть? Исправляется такая проблема крайне просто. Так как контекст переопределился, когда мы вызвали внутри метода `initDomListeners` файла `DomListener` => `this[methodName]`, надо тут просто добавить `bind(this)` к методу, и он проигнорирует переопределение контекста
             `DomListener`:
                 `
@@ -1288,13 +1350,13 @@
                         })
                     }
                 `
-        * Маленький штришок - в конструктор класса `ExcelComponent` добавлю сточку `this.name = options.name || ''`, так как внктри, допустим, формулы мы созлайм в `options` такое свойство `name` 
+        * Маленький штришок - в конструктор класса `ExcelComponent` добавлю сточку `this.name = options.name || ''`, так как внутри, допустим, формулы мы создаём в `options` такое свойство `name` 
 
         * Теперь нужно реализовать удаление листенеров.
             Для этого я добавлю метод `off` в `dom.js`:
                 `
                     off(eventType, callback) {
-                        this.$nativeElement.removeEventListener(eventType, callback)
+                        this.nativeElement.removeEventListener(eventType, callback)
                     }
                 `
             `DomListener`:
@@ -1322,7 +1384,6 @@
                             listeners: ["click"],
                         });
                     }
-
                     onClick(event) {
                         console.log(event.target);
                     }
@@ -1332,7 +1393,7 @@
     5. 3. Создание таблицы.
         5. 3. 1. Заголовки.
             В файле `Table.js` мы возвращаем статический html. Это не круто, поэтому удалим его и создадим для него автогенерированную вёрстку.
-                Создадим файл, в который вынесем логику, связанную с вёрсткой таблицы и назовёт его `table.template.js`. Внутри него:
+                Создадим файл, в который вынесем логику, связанную с вёрсткой таблицы и назовём его `table.template.js`. Внутри него:
                     `
                         export function createTable() {
                             return "<h1>Table</h1>";
@@ -1362,8 +1423,8 @@
                                 Z: 90,
                             };
                         `
-                        * Зачем это делать, если можно будет просто писать 65, 90. Затеи что запись `CODES.A` более понятна что означает. Писать `65, 90, ...` нарушает конвенцию `magic number`, гласящую, что не должно быть непонятных цифр, а нужно пояснение. 
-            Определим количесиво столбцов.
+                        * Зачем это делать, если можно будет просто писать 65, 90. Затем, что запись `CODES.A` более понятна что означает. Писать `65, 90, ...` нарушает конвенцию `magic number`, гласящую, что не должно быть непонятных цифр, а нужно пояснение. 
+            Определим количество столбцов.
                 `table.template.js`:
                     `
                         export function createTable(rowsCount = 15) {
@@ -1399,7 +1460,7 @@
                             `
                             }
                     `
-            Теперь все функции, в приципе есть, и можно заняться генерацией рядов. Их мы будем заносить в массив `rows` и в конце функции `createTable` будем возвращать `rows.join('')`
+            Теперь все функции, в приципе, есть, и можно заняться генерацией рядов. Их мы будем заносить в массив `rows` и в конце функции `createTable` будем возвращать `rows.join('')`
                 `table.template.js`:
                     `
                         export function createTable(rowsCount = 15) {
@@ -1436,7 +1497,7 @@
                     `
             * Подумаем пока про первый ряд, который шапка таблицы (`A, B, C, ..., Z`). Его контент типа `<div class="column">A</div><div class="column">B</div><div class="column">C</div>...`. Надо только сгенерировать эти буквы (по коду Ascii). У нас есть количество столбцов, и от него мы можем отталкиваться.
             Надо создать массив букв `A, B, C, ..., Z`. Потом из каждой буквы сделать колонку (ячейку колонки). Потом склеить их всех методом `join('')` и дать, как контент в метод `createRow`.
-            Методу `createCol(el)` дадим параметр `el` на вход (это юудут меняющиеся буквы (`A, B, C, ..., Z`))
+            Методу `createCol(el)` дадим параметр `el` на вход (это будут меняющиеся буквы (`A, B, C, ..., Z`))
                 `table.template.js`:
                     `
                         function createCol(el) {
@@ -1471,6 +1532,7 @@
                             return String.fromCharCode(CODES.A + index);
                         }
                     `
+                Тогда `.map((_, index) => String.fromCharCode(CODES.A + index))` -> `.map(toChar)`
                 3. `createCol` переименуем в `toColumn`
             * Итоговый код `table.template.js`:
                 `
@@ -1516,7 +1578,7 @@
                 `
         5. 3. 2. Ячейки.
         *** Сделать ячейки постараться сделать домашним заданием (по аналогии с заголовками) ***
-            Итак, нужно создать количество рядов, равное `rowsCount`. Каэжый ряд - это `colsCount` ячеек, каждая представляющая собой то, что возвращает метод `createCell` (переименуем его в `toCell` и удалим конетнт `B2`). Т.е. по аналогии с заголовками создадим массив длинной `rowsCount` (`new Array(colsCount)`), для каждого вызовем метод `toCell` и заджойнить:
+            Итак, нужно создать количество рядов, равное `rowsCount`. Каждый ряд - это `colsCount` ячеек, каждая представляющая собой то, что возвращает метод `createCell` (переименуем его в `toCell` и удалим контент `B2`). Т.е. по аналогии с заголовками создадим массив длинной `colsCount` (`new Array(colsCount)`), для каждого вызовем метод `toCell` и заджойнить:
                 `table.template.js`:
                     `
                         function toCell() {
@@ -1540,13 +1602,13 @@
                                 .fill('')                               <===========
                                 .map(toCell)                            <===========
                                 .join('')                               <===========
-                                rows.push(createRow(cells));     <===========
+                                rows.push(createRow(cells));            <===========
                             }
                             return rows.join("");
                         }
                     `
             Смотрим в браузере. Ячейки добавились, но нет цифр у дивов с классом `row-info`. Для этого добавим первым параметром индекс ряда в метод `createRow`. Первому ряду (шапке) индекс не нужен. Поэтому туда первым параметром дадим пустую строку. А где создаём ряды с рабочими ячейками, дадим `index + 1`, т.к. индексы в цикле `for` начинаются с нуля.
-                `table.template.js` ():
+                `table.template.js` (весь):
                     `
                         const CODES = {
                             A: 65,
@@ -1562,10 +1624,10 @@
                                 <div class="column">${el}</div>
                             `;
                         }
-                        function createRow(index, content) {
+                        function createRow(index, content) {                                    <=========== edited
                             return `
                                 <div class="row">
-                                <div class="row-info">${index}</div>
+                                <div class="row-info">${index}</div>                             <=========== edited
                                 <div class="row-data">${content}</div>
                                 </div>  
                             `;
@@ -1581,14 +1643,13 @@
                                 .map(toChar)
                                 .map(toColumn)
                                 .join("");
-                            rows.push(createRow('', cols));
+                            rows.push(createRow('', cols));                                      <=========== edited
                             for (let i = 0; i < rowsCount; i++) {
                                 const cells = new Array(colsCount)
                                 .fill('')
                                 .map(toCell)
                                 .join('')
-
-                                rows.push(createRow(i + 1, cells));
+                                rows.push(createRow(i + 1, cells));                              <=========== edited
                             }
                             return rows.join("");
                         }
@@ -1616,7 +1677,7 @@
             `git checkout -b resize`
         И запустим проект
             `npm run start`
-        * Показать, как происходит ресайз ячеек в реальном Excel. Навоэу на грань колонки, появляется какой-то значок, двигаю мышкой - меняется ширина колонки. Также и с рядами.
+        * Показать, как происходит ресайз ячеек в реальном Excel. Навожу на грань колонки, появляется какой-то значок, двигаю мышкой - меняется ширина колонки. Также и с рядами.
         * Подумаем, как это реализовать. Для этого сделаем диаграмму `Ресайз`.
         * Для начала сделаем ресайз колонок. Для этого надо сделать следующее:
             1. При наведении на границу колонки должен появляться значок ресайза
@@ -1625,7 +1686,7 @@
             5. При отпускании мышки должен применяться ресайз
 
         Теперь откроем файл `Table.js`. Создадим конструктор и добавим пару листенеров: `click` и `mousedown`
-            `Table.js`
+            `Table.js`:
                 `
                     constructor($root) {
                         super($root, {
@@ -1846,7 +1907,7 @@
                     }
                 `
                 * Смотрим в консоли, видим элементы, по которым мы кликаем.
-                * Коллбэк срабатывает по клику на любой элемент. А нужн онам, чтобы он срабатывал только по клику на ресайзер. Подумаем, как это сделать (выделить элементы ресайза и реагировать только на клики по ним).
+                * Коллбэк срабатывает по клику на любой элемент. А нужно нам, чтобы он срабатывал только по клику на ресайзер. Подумаем, как это сделать (выделить элементы ресайза и реагировать только на клики по ним).
 
         *** Тут надо объяснить почему мы будем работать с дата-атрибутами, а не с классами, id или ещё что-то такое, связанное с View. Нам надо определять по какому элементу мы кликаем. Можно, конечно, это определять по классу, но тогда может произойти следующее. Моэет прийти тимлид и сказать, что названия классов не соответствуют нашему стайл-гайду, и надо бы их переименовать. Мол, БЭМ неправильный, например. Или вообще прийдёт следующий программист, которому не понравятся эти названия классов, и он их изменит. Тогда логика полетит к чертям. Это допускать никак нельзя. Классы, id - только для вью. Для всех логических вещей мы будем использовать data-атрибуты. Они будут служить нам метадатой. Прослойкой, какбэ, между вью и логикой. *** `(Ресайз, диаграмма 2)`
 
@@ -1857,13 +1918,13 @@
                         return `
                             <div class="column">
                             ${el}
-                            <div class="col-resize" data-resize="col"></div> 
+                            <div class="col-resize" data-resize="col"></div>                                 <======= Edited
                             </div>
                         `;
                         }
 
                         function createRow(index, content) {
-                        const resize = index ? '<div class="row-resize" data-resize="row"></div>' : ""
+                        const resize = index ? '<div class="row-resize" data-resize="row"></div>' : ""       <======= Edited
                         return `
                             <div class="row">
                             <div class="row-info">
@@ -1876,7 +1937,7 @@
                         }
                 `
         * Теперь надо отловить клик по именно элементу ресайза (взять значение их дата-атрибута).
-        Значение любого атрибута можно взять серез `.getAttribute(attrName)`
+        Значение любого атрибута можно взять через `.getAttribute(attrName)`
             `Table.js`:
                 `
                     onMousedown(event) {
@@ -1913,33 +1974,35 @@
                         onMousedown(event) {
                             if (event.target.dataset.resize) {
                                 const $resizer = $(event.target);
-                                const $parent = $resizer.$nativeElement.parentNode;
+                                const $parent = $resizer.nativeElement.parentNode;
                                 console.log($parent);
                             }
                         }
                     `
-                    * Смотрим в консоли, работает, но это не очень, потому что `parentNode` лучше не использовать, так как, если мы изменим вёрстку, и элемент уже не будет родительским к ресайзу, логика полетит. Поэтому мы опять будем использовать дата-атрибуты, и нужному диву дадим `data-type='resizable'`
-                        * P.S. так же можно было бы использовать 
-                        `const $parent = $resizer.$nativeElement.closest(".column")`, но это опять привязка к вью, поэтому мы не будем его использовать.
+                    * Смотрим в консоли, работает, но это не очень, потому что `parentNode` лучше не использовать, так как, если мы изменим вёрстку, и элемент уже не будет родительским к ресайзу, логика полетит.
+                    Можно использовать `const $parent = $resizer.nativeElement.closest(".column")`, но это опять привязка к вью, поэтому мы не будем так делать.
+               
+            Поэтому мы опять будем использовать дата-атрибуты, и нужному диву дадим `data-type='resizable'`
+                        
                     `table.template.js`:
                         `
                             function toColumn(el) {
                                 return `
-                                    <div class="column" data-type="resizable">
+                                    <div class="column" data-type="resizable">                  <====== Edited
                                     ${el}
                                     <div class="col-resize" data-resize="col"></div> 
                                     </div>
                                 `;
                             }
-                        `
-                        Проверяем в консоли, всё ок.
-                        * Перенесём только в класс `Dom` метод, получающий ближайшго родителя
+                        `    
+            Проверяем в консоли, всё ок.
+                        * Перенесём только в класс `Dom` метод, получающий ближайшего родителя
                             `Dom.js`:
                                 `
                                     export class Dom {
                                         ...
                                         closest(selector) {
-                                            return $(this.$nativeElement.closest(selector));
+                                            return $(this.nativeElement.closest(selector));
                                         }
                                     }
                                 `
@@ -1961,11 +2024,11 @@
                                     export class Dom {
                                         ...
                                         getCoords() {
-                                            return this.$nativeElement.getBoundingClientRect();
+                                            return this.nativeElement.getBoundingClientRect();
                                         }
                                     }
                                 `
-                        * У `getBoundingClientRect()` есть свойства `width`,  `height`, `rught`. Поэтому в `Table.js` мы можем написать так:
+                        * У `getBoundingClientRect()` есть свойства `width`,  `height`, `right`. Поэтому в `Table.js` мы можем написать так:
                             `Table.js`:
                                 `
                                     onMousedown(event) {
@@ -1976,7 +2039,7 @@
                                         }
                                     }
                                 `
-                                Проверяем в консоли, видим объект со свойствами `width`,  `height`, `rught`. `width` - это ширина колонки, которую мы будем ресайзить. `right` - это правая граница колонки, которую мы будем ресайзить. `height` - высота колонки, которую мы будем ресайзить. 
+                                Проверяем в консоли, видим объект со свойствами `width`,  `height`, `right`. `width` - это ширина колонки, которую мы будем ресайзить. `right` - это правая граница колонки, которую мы будем ресайзить. `height` - высота колонки, которую мы будем ресайзить. 
             * Теперь надо отслеживать изменение курсора при перемещении. Поэтому в классе `Table` изменим коллбэк `onMousedown`, вставив туда листенер `mousemove`.
                 `Table.js`:
                     `
@@ -1998,7 +2061,7 @@
                                 document.onmousemove = e => {
                                     const delta = e.x - coords.right;
                                     const value = coords.width + delta;
-                                    $parent.$nativeElement.style.width = value + "px";
+                                    $parent.nativeElement.style.width = value + "px";
                                 };
                             `
                     Меняем в браузере её ширину, всё ок.
@@ -2023,7 +2086,7 @@
                     }
                 `
             Теперь в каждой верхней ячейке есть дата-атрибут `data-col`, который равен номеру колонки. проверяем это в devTools.
-            Теперб нужно такие же индексы задать для каждой из ячеек.
+            Теперь нужно такие же индексы задать для каждой из ячеек.
             Это метод `toCell`. Передадим ему индекс колонки и индекс ряда.
                 `table.template.js`:
                     `
@@ -2040,7 +2103,7 @@
                         export class Dom {
                             ...
                             get data() {
-                                return this.$nativeElement.dataset;
+                                return this.nativeElement.dataset;
                             }
                         }
                     `
@@ -2052,7 +2115,7 @@
                                 const $resizer = $(event.target);
                                 const $parent = $resizer.closest("[data-type='resizable']");
                                 const coords = $parent.getCoords();
-                                console.log($parent.data);
+                                console.log($parent.data);                                          <=========== new
                                 ...
                     `
                         Кликаем на `resizer`, видим в консоли `dataset` типа `{type: 'resizable', col: '6'}`
@@ -2063,19 +2126,19 @@
                         document.onmousemove = (e) => {
                             const delta = e.x - coords.right;
                             const value = coords.width + delta;
-                            $parent.$nativeElement.style.width = value + "px";
+                            $parent.nativeElement.style.width = value + "px";
                             document
                                 .querySelectorAll(`[data-col="${$parent.data.col}"]`)
                                 .forEach((el) => (el.style.width = value + "px"));
                         ...
                     `
-            Ресайзим, работает. Но! Есть проблемы с производительностью. Коллбэк `mousemove` вызывается очень часто, и каждый раз мы делаем запрос к `Dom`-дереву. Это очень ресурсозатратно. Поэтому надо сделать так, чтобы мы не обращались к `Dom`-дереву каждый раз, а только один раз, когда начинаем ресайзить. Для этого надо гаходить все ячейки не внутри коллбэка на `mousemove`, а внутри коллбэка на `mousedown`. Т.е. надо найти все ячейки в колонке и сохранить их в переменную. А потом уже в коллбэке на `mousemove` менять их ширину. (так же, поменяем `document` на `this.$root`).
+            Ресайзим, работает. Но! Есть проблемы с производительностью. Коллбэк `mousemove` вызывается очень часто, и каждый раз мы делаем запрос к `Dom`-дереву. Это очень ресурсозатратно. Поэтому надо сделать так, чтобы мы не обращались к `Dom`-дереву каждый раз, а только один раз, когда начинаем ресайзить. Для этого надо находить все ячейки не внутри коллбэка на `mousemove`, а внутри коллбэка на `mousedown`. Т.е. надо найти все ячейки в колонке и сохранить их в переменную. А потом уже в коллбэке на `mousemove` менять их ширину. (так же, поменяем `document` на `this.$root`).
                 `dom.js`:
                     `
                         export class Dom {
                             ...
                             findAll(selector) {
-                                return this.$nativeElement.querySelectorAll(selector);
+                                return this.nativeElement.querySelectorAll(selector);
                             }
                         }
                     `
@@ -2121,12 +2184,12 @@
                                     if (type === "col") {
                                     const delta = e.x - coords.right;
                                     const value = coords.width + delta;
-                                    $parent.$nativeElement.style.width = value + "px";
+                                    $parent.nativeElement.style.width = value + "px";
                                     cells.forEach((el) => (el.style.width = value + "px"));
                                 } else {
                                     const delta = e.y - coords.bottom;
                                     const value = coords.height + delta;
-                                    $parent.$nativeElement.style.height = value + "px";
+                                    $parent.nativeElement.style.height = value + "px";
                                     }
                                 };
                                 document.onmouseup = () => {
@@ -2135,14 +2198,14 @@
                             }
                         }
                     `
-        * Но то, что мы используем `$nativeElement` в js, это не норм. Надо создать метод `css(styles)` по аналогии с `jquery` и использовать его.
+        * Но то, что мы используем `nativeElement` в js, это не норм. Надо создать метод `css(styles)` по аналогии с `jquery` и использовать его.
             `Dom.js`:
                 `
                     export class Dom {
                         ...
                         css(styles = {}) {
                             Object.keys(styles).forEach((key) => {
-                                this.$nativeElement.style[key] = styles[key];
+                                this.nativeElement.style[key] = styles[key];
                             });
                         }
                     }
@@ -2225,11 +2288,11 @@
                         if (type === "col") {
                             ...
                             value = coords.width + delta;
-                            $resizer.css({right: -delta + "px"});  // New
+                            $resizer.css({right: -delta + "px"});      <======== New
                         } else {
                             ...
                             value = coords.height + delta;
-                            $resizer.css({bottom: -delta + "px"});  // New
+                            $resizer.css({bottom: -delta + "px"});      <======== New
                         }
                     };
                 `
@@ -2241,14 +2304,13 @@
                         ...
                         z-index: 1000;
                 `
-            Теперь надо вернуть на знаечение 0 свойству `right` и `bottom` у ресайзера рядов и колонок соответственно.
-                `Table.js` => `onMousedown(event)`:
+            Теперь надо вернуть на значение 0 свойству `right` и `bottom` у ресайзера рядов и колонок соответственно.
+                * `Table.js` => `onMousedown(event)`:
                     `
                         ...
                         document.onmouseup = () => {
                             document.onmousemove = null;
                             document.onmouseup = null;
-
                             if (type === "col") {
                                 $parent.css({width: value + "px", right: 0});
                                 cells.forEach((el) => (el.style.width = value + "px"));
@@ -2359,8 +2421,24 @@
                             }
                         `
         Всё, доделали ресайзер, круто. Надо залить это всё теперь в гит.
-        
+        Делаем коммит-пуш `Finish table resize`. 
+        Заходим на сайт `github`. 
+            `Compare & Pull request`
+            `Merge pull request`
+            `Confirm merge`
+        Заходми в репозиторий, видим изменения в ветке `main`.
+        Возвращаемся в редактор кода. Переходим на ветку `main` и делаем `git pull`. Всё ок.
+
+7. Логика
+    Тут мы будем работать с логикой таблицы и взаимосвязью разных компонентов.
+    
 
 
-    *** Начать с урока 04_08 00:00 ***
-    *** С пацанами закончил на 370 строчке ***
+
+
+
+    *** Начать с урока 05_01 00:00 ***
+    *** Продолжить смотреть с урока 05_16 00:00 ***
+    *** С Антоном закончил на 1191 строчке ***
+    *** С Костей закончил на 1657 строчке ***
+    *** Повторять закончил на 2430 строчке ***
