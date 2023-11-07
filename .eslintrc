@@ -14,9 +14,11 @@
     "no-trailing-spaces": "off",
     "no-unused-vars": "off",
     "max-len": "off",
+    "no-debugger": "off",
     "object-curly-spacing": "off",
     "operator-linebreak": "off",
     "padded-blocks": "off",
+    "space-before-function-paren": "off",
     "quotes": "off",
     "require-jsdoc": "off",
     "semi": "off"
